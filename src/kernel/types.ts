@@ -1,0 +1,1 @@
+export type ProviderType = 'slots' | 'live_dealers';
