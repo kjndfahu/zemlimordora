@@ -23,7 +23,7 @@ export function SearchBar({ searchTerm, setSearchTerm }: SearchBarProps) {
                         Баннеры
                     </div>
                 </Link>
-                <Link href="/banners">
+                <Link href="/change-first-slot">
                     <div
                         className="flex self-center items-center text-[15px] justify-center w-[120px] h-[30px] text-black rounded-[10px] bg-gradient-to-r from-[#00FF90] via-[#66FFA4] to-[#009353]">
                         Порядок слотов

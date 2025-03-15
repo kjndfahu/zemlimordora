@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppRoot } from "@telegram-apps/telegram-ui";
 import {Header} from "@/features/header/container/header";
+import {UserProvider} from "@/features/my-account/context/user-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,8 +31,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
       <AppRoot>
-          <Header/>
-          {children}
+          <UserProvider>
+              <Header/>
+              {children}
+          </UserProvider>
       </AppRoot>
       </body>
     </html>

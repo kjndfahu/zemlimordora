@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, Upload, Trash2, MoveUp, MoveDown } from "lucide-react"
+import { ArrowLeft, Upload, Trash2 } from "lucide-react"
 
 interface Banner {
     id: number
@@ -19,12 +19,10 @@ export default function BannerAdmin() {
     const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null)
     const [isUploading, setIsUploading] = useState(false)
 
-    // Загрузка списка баннеров при монтировании компонента
     useEffect(() => {
         fetchBanners()
     }, [])
 
-    // Функция для получения списка баннеров с сервера
     const fetchBanners = async () => {
         setIsLoading(true)
         try {
@@ -43,7 +41,6 @@ export default function BannerAdmin() {
         }
     }
 
-    // Обработчик загрузки файла
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             setIsUploading(true)
@@ -51,11 +48,9 @@ export default function BannerAdmin() {
             try {
                 const file = e.target.files[0]
 
-                // Создаем FormData для отправки файла
                 const formData = new FormData()
                 formData.append("file", file)
 
-                // Отправляем файл на сервер
                 const response = await fetch("/api/banners", {
                     method: "POST",
                     body: formData,
@@ -67,7 +62,6 @@ export default function BannerAdmin() {
 
                 const newBanner = await response.json()
 
-                // Обновляем список баннеров
                 await fetchBanners()
 
                 setMessage({
@@ -86,7 +80,6 @@ export default function BannerAdmin() {
         }
     }
 
-    // Обработчик удаления баннера
     const handleDeleteBanner = async (id: number) => {
         if (!confirm("Вы уверены, что хотите удалить этот баннер?")) {
             return
@@ -103,7 +96,6 @@ export default function BannerAdmin() {
                 throw new Error("Failed to delete banner")
             }
 
-            // Обновляем список баннеров
             await fetchBanners()
 
             setMessage({
@@ -121,10 +113,9 @@ export default function BannerAdmin() {
         }
     }
 
-    // Обработчик изменения порядка баннеров
     const moveBanner = async (index: number, direction: "up" | "down") => {
         if ((direction === "up" && index === 0) || (direction === "down" && index === banners.length - 1)) {
-            return // Нельзя двигать дальше в этом направлении
+            return
         }
 
         const newIndex = direction === "up" ? index - 1 : index + 1
@@ -149,7 +140,6 @@ export default function BannerAdmin() {
                 throw new Error("Failed to reorder banners")
             }
 
-            // Обновляем список баннеров
             await fetchBanners()
 
             setMessage({

@@ -1,15 +1,24 @@
-import type React from "react";
+"use client"
 
-export default async function AdminLayout({
-                                                children,
-                                            }: {
-    children: React.ReactNode;
+import type React from "react"
+import { useUser } from "@/features/my-account/context/user-context"
+import {redirect} from "next/navigation";
+
+export default function AdminLayout({
+                                        children,
+                                    }: {
+    children: React.ReactNode
 }) {
+    const { user } = useUser()
 
+    if (!user) {
+        return null
+    }
 
-    return (
-        <main>
-            {children}
-        </main>
-    )
+    if (!user.is_admin) {
+        redirect('/')
+    }
+
+    return <main>{children}</main>
 }
+

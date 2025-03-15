@@ -43,7 +43,6 @@ export default function UserProfile() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [activeTab, setActiveTab] = useState<"info" | "deposits" | "withdrawals" | "bets">("info")
-    const [adjustmentAmount, setAdjustmentAmount] = useState("")
     const [isChangingStatus, setIsChangingStatus] = useState(false)
 
     const handleBalanceChange = () => {
@@ -55,7 +54,7 @@ export default function UserProfile() {
         const fetchUserData = async () => {
             setLoading(true)
             try {
-                const response = await getUserProfile(userId)
+                const response = await getUserProfile()
                 if (response.success && response.data) {
                     setUserData(response.data)
                 } else {
@@ -79,7 +78,7 @@ export default function UserProfile() {
         try {
             const response = await changeUserStatus(userData.general.user_id, !userData.general.is_banned)
             if (response.success) {
-                const updatedData = await getUserProfile(userId)
+                const updatedData = await getUserProfile()
                 if (updatedData.success && updatedData.data) {
                     setUserData(updatedData.data)
                 }

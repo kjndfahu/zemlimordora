@@ -5,8 +5,7 @@ import { type Game, getGames } from "@/enteties/games/get-games"
 import { openGame } from "@/enteties/games/open-game"
 import { postLastGame } from "@/enteties/games/post-last-game"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import {GameUnavailableModal} from "@/features/home/ui/game-unavaliable-modal";
-
+import { GameUnavailableModal } from "@/features/home/ui/game-unavaliable-modal"
 
 interface GameGridProps {
     selectedProviderId: string | null
@@ -53,53 +52,43 @@ export default function GameGrid({ selectedProviderId, searchTerm, selectedCateg
 
         // Filter by category
         if (selectedCategory) {
-            console.log("Filtering by category:", selectedCategory)
             filtered = filtered.filter((game) => {
                 const gameCategory = game.category || ""
                 return typeof gameCategory === "string" && gameCategory.toLowerCase() === selectedCategory.toLowerCase()
             })
-            console.log("Games after category filtering:", filtered.length)
         }
 
         // Filter by provider
         if (selectedProviderId !== null) {
-            console.log("Filtering by provider ID:", selectedProviderId)
             filtered = filtered.filter((game) => {
-                // Check if the game's provider_name matches the selected provider ID
                 const gameProviderName = game.provider_name || ""
                 const selectedProvider = selectedProviderId
-
-                // Case insensitive match
                 return (
                     typeof gameProviderName === "string" &&
                     typeof selectedProvider === "string" &&
                     gameProviderName.toLowerCase() === selectedProvider.toLowerCase()
                 )
             })
-            console.log("Games after provider filtering:", filtered.length)
         }
 
         // Filter by search term
         if (searchTerm) {
             filtered = filtered.filter((game) => game.name.toLowerCase().includes(searchTerm.toLowerCase()))
-            console.log("Games after search filtering:", filtered.length)
         }
 
-        // Sort games to put the first slot game at the beginning if it's in the filtered results
-        if (firstSlotGame) {
-            // Check if the first slot game is in the filtered results
-            const firstSlotInFiltered = filtered.find((game) => game.id === firstSlotGame.id)
+        // Sort games by priority first, then handle first slot game
+        filtered.sort((a, b) => (b.priority || 0) - (a.priority || 0))
 
-            if (firstSlotInFiltered) {
-                // Remove the first slot game from the filtered array
-                filtered = filtered.filter((game) => game.id !== firstSlotGame.id)
-                // Add it back at the beginning
-                filtered = [firstSlotGame, ...filtered]
+        // If there's a first slot game and it's in the filtered results, move it to the beginning
+        if (firstSlotGame) {
+            const firstSlotIndex = filtered.findIndex((game) => game.id === firstSlotGame.id)
+            if (firstSlotIndex !== -1) {
+                const [firstSlot] = filtered.splice(firstSlotIndex, 1)
+                filtered.unshift(firstSlot)
             }
         }
 
         setFilteredGames(filtered)
-        // Reset to first page when filters change
         setCurrentPage(1)
     }, [games, selectedProviderId, searchTerm, selectedCategory, firstSlotGame])
 
@@ -172,10 +161,7 @@ export default function GameGrid({ selectedProviderId, searchTerm, selectedCateg
         <div>
             <div id="game-grid" className="grid grid-cols-3 gap-3">
                 {currentGames.map((game) => (
-                    <div
-                        key={game.id}
-                        className={`flex flex-col ${game.is_first ? "relative rounded-lg" : ""}`}
-                    >
+                    <div key={game.id} className={`flex flex-col ${game.is_first ? "relative rounded-lg" : ""}`}>
                         <div className="relative w-full aspect-square rounded-lg overflow-hidden group">
                             <img
                                 src={game.img_url || "/placeholder.svg"}
@@ -192,6 +178,7 @@ export default function GameGrid({ selectedProviderId, searchTerm, selectedCateg
                                 </button>
                             </div>
                         </div>
+                        <h3>{game.id}</h3>
                         <h3 className="mt-2 text-sm text-center truncate">{game.name}</h3>
                     </div>
                 ))}

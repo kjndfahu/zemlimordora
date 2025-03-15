@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import {changeFirstSlot} from "@/enteties/admin/change-first-slot";
+import {changeGamePriority} from "@/enteties/admin/change-first-slot";
 
 
 interface Notification {
@@ -11,12 +11,12 @@ interface Notification {
     message: string
 }
 
-export default function ChangeFirstSlot() {
+export default function ChangeGamePriority() {
     const [gameId, setGameId] = useState("")
+    const [priority, setPriority] = useState("")
     const [loading, setLoading] = useState(false)
     const [notification, setNotification] = useState<Notification | null>(null)
 
-    // Auto-hide notification after 3 seconds
     useEffect(() => {
         if (notification) {
             const timer = setTimeout(() => {
@@ -29,17 +29,20 @@ export default function ChangeFirstSlot() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (!gameId) {
+        if (!gameId || !priority) {
             setNotification({
                 type: "error",
-                message: "Пожалуйста, введите ID игры",
+                message: "Пожалуйста, заполните все поля",
             })
             return
         }
 
         try {
             setLoading(true)
-            const response = await changeFirstSlot(Number(gameId))
+            const response = await changeGamePriority({
+                game_id: Number(gameId),
+                priority: Number(priority),
+            })
 
             if (response.success) {
                 setNotification({
@@ -47,6 +50,7 @@ export default function ChangeFirstSlot() {
                     message: response.message,
                 })
                 setGameId("")
+                setPriority("")
             } else {
                 setNotification({
                     type: "error",
@@ -54,9 +58,11 @@ export default function ChangeFirstSlot() {
                 })
             }
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error)
+            console.error("Error in form submission:", errorMessage)
             setNotification({
                 type: "error",
-                message: "Произошла ошибка при изменении первого слота",
+                message: "Произошла ошибка при изменении приоритета",
             })
         } finally {
             setLoading(false)
@@ -66,11 +72,15 @@ export default function ChangeFirstSlot() {
     return (
         <div className="min-h-screen bg-black text-white p-4">
             <div className="max-w-md mx-auto mt-8">
-                <h1 className="text-2xl font-bold mb-6">Изменить первый слот</h1>
+                <h1 className="text-2xl font-bold mb-6">Изменить приоритет игры</h1>
 
                 {notification && (
                     <div
-                        className={`p-3 mb-4 rounded-md ${notification.type === "success" ? "bg-green-500/20 border border-green-500" : "bg-red-500/20 border border-red-500"}`}
+                        className={`p-3 mb-4 rounded-md ${
+                            notification.type === "success"
+                                ? "bg-green-500/20 border border-green-500"
+                                : "bg-red-500/20 border border-red-500"
+                        }`}
                     >
                         {notification.message}
                     </div>
@@ -87,6 +97,21 @@ export default function ChangeFirstSlot() {
                             value={gameId}
                             onChange={(e) => setGameId(e.target.value)}
                             placeholder="Введите ID игры"
+                            className="w-full p-2 rounded-md bg-gray-800 border border-gray-700 text-white"
+                            disabled={loading}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label htmlFor="priority" className="block text-sm font-medium">
+                            Приоритет
+                        </label>
+                        <input
+                            id="priority"
+                            type="number"
+                            value={priority}
+                            onChange={(e) => setPriority(e.target.value)}
+                            placeholder="Введите приоритет (больше = выше)"
                             className="w-full p-2 rounded-md bg-gray-800 border border-gray-700 text-white"
                             disabled={loading}
                         />

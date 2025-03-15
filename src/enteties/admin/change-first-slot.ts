@@ -1,11 +1,16 @@
 import axios from "axios"
 
-interface ChangeFirstSlotResponse {
+interface ChangeGamePriorityParams {
+    game_id: number
+    priority: number
+}
+
+interface ChangeGamePriorityResponse {
     success: boolean
     message: string
 }
 
-export const changeFirstSlot = async (gameId: number): Promise<ChangeFirstSlotResponse> => {
+export const changeGamePriority = async (params: ChangeGamePriorityParams): Promise<ChangeGamePriorityResponse> => {
     try {
         let telegramInitData = ""
 
@@ -14,8 +19,12 @@ export const changeFirstSlot = async (gameId: number): Promise<ChangeFirstSlotRe
             telegramInitData = WebApp.initData
         }
 
-        const response = await axios.post<ChangeFirstSlotResponse>(
-            `https://ce99-109-120-134-48.ngrok-free.app/api/admin/change_first_slot?game_id=${gameId}`,
+        const response = await axios.post<ChangeGamePriorityResponse>(
+            `https://ce99-109-120-134-48.ngrok-free.app/api/admin/change_game_priority`,
+            {
+                game_id: params.game_id,
+                priority: params.priority,
+            },
             {
                 headers: {
                     "ngrok-skip-browser-warning": "true",
@@ -28,19 +37,23 @@ export const changeFirstSlot = async (gameId: number): Promise<ChangeFirstSlotRe
 
         return {
             success: true,
-            message: "Первый слот успешно изменен",
+            message: "Приоритет игры успешно изменен",
         }
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Ошибка при изменении первого слота:", error.response?.data)
+            // Safe error logging to avoid potential undefined access
+            console.error("Ошибка при изменении приоритета игры:", error.message)
             return {
                 success: false,
-                message: error.response?.data?.message || "Ошибка при изменении первого слота",
+                message: error.response?.data?.message || "Ошибка при изменении приоритета игры",
             }
         }
+        // Handle non-Axios errors
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        console.error("Неизвестная ошибка:", errorMessage)
         return {
             success: false,
-            message: "Неизвестная ошибка при изменении первого слота",
+            message: "Неизвестная ошибка при изменении приоритета игры",
         }
     }
 }

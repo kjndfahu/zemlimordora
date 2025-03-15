@@ -5,6 +5,7 @@ export interface User {
     balance: number
     username: string
     is_banned: boolean
+    is_admin: boolean
 }
 
 interface UserResponse {
@@ -22,7 +23,7 @@ export const getUser = async (): Promise<UserResponse> => {
         if (typeof window !== "undefined") {
             const WebApp = (await import("@twa-dev/sdk")).default
             telegramInitData = WebApp.initData
-            userId = 123
+            userId = WebApp.initDataUnsafe.user?.id
         }
 
         const response = await axios.get<User>(`https://ce99-109-120-134-48.ngrok-free.app/api/me?user_id=${userId}`, {

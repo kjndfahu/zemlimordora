@@ -28,7 +28,7 @@ export const getLastGames = async (): Promise<LastGamesResponse> => {
         if (typeof window !== "undefined") {
             const WebApp = (await import("@twa-dev/sdk")).default
             telegramInitData = WebApp.initData
-            userId  = 123;
+            userId  = WebApp.initDataUnsafe.user?.id;
         }
 
         const response = await axios.get<LastGamesData>(`https://ce99-109-120-134-48.ngrok-free.app/api/last_games`, {

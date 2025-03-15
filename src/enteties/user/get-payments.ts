@@ -16,11 +16,12 @@ interface PaymentsResponse {
 export const getPayments = async (): Promise<PaymentsResponse> => {
     try {
         let telegramInitData = ""
-        let userId = 123
+        let userId = null
 
         if (typeof window !== "undefined") {
             const WebApp = (await import("@twa-dev/sdk")).default
             telegramInitData = WebApp.initData
+            userId = WebApp.initDataUnsafe.user?.id
         }
 
         const response = await axios.get<{ payment_rows: Payment[] }>(
@@ -41,16 +42,16 @@ export const getPayments = async (): Promise<PaymentsResponse> => {
             payment_rows: response.data.payment_rows,
         }
     } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error("Ошибка при получении платежей:", error.response?.data)
-            return {
-                success: false,
-                message: error.response?.data?.message || "Ошибка при получении платежей",
-            }
+        // Silently handle errors without logging to console
+        let errorMessage = "Ошибка при получении платежей"
+
+        if (axios.isAxiosError(error) && error.response?.data?.message) {
+            errorMessage = error.response.data.message
         }
+
         return {
             success: false,
-            message: "Неизвестная ошибка при получении платежей",
+            message: errorMessage,
         }
     }
 }

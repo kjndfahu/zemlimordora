@@ -16,13 +16,15 @@ interface HistoryBetsResponse {
     bets?: HistoryBet[]
 }
 
-export const getHistoryBets = async (userId = 123): Promise<HistoryBetsResponse> => {
+export const getHistoryBets = async (): Promise<HistoryBetsResponse> => {
     try {
         let telegramInitData = ""
+        let userId = null
 
         if (typeof window !== "undefined") {
             const WebApp = (await import("@twa-dev/sdk")).default
             telegramInitData = WebApp.initData
+            userId = WebApp.initDataUnsafe.user?.id
         }
 
         const response = await axios.get<{ bets: HistoryBet[] }>(
@@ -38,19 +40,36 @@ export const getHistoryBets = async (userId = 123): Promise<HistoryBetsResponse>
             },
         )
 
+        // If the response is successful but there are no bets, return an empty array
         return {
             success: true,
             message: "История ставок успешно получена",
-            bets: response.data.bets,
+            bets: response.data.bets || [],
         }
     } catch (error) {
+        // Handle 404 or empty data case gracefully without logging errors
         if (axios.isAxiosError(error)) {
-            console.error("Ошибка при получении истории ставок:", error.response?.data)
+            // If it's a 404 error or the server indicates no data is available
+            if (
+                error.response?.status === 404 ||
+                error.response?.data?.message?.includes("не найден") ||
+                error.response?.data?.message?.includes("нет данных")
+            ) {
+                return {
+                    success: true,
+                    message: "История ставок пуста",
+                    bets: [],
+                }
+            }
+
+            // For other errors, return error without console logging
             return {
                 success: false,
                 message: error.response?.data?.message || "Ошибка при получении истории ставок",
             }
         }
+
+        // For non-Axios errors
         return {
             success: false,
             message: "Неизвестная ошибка при получении истории ставок",

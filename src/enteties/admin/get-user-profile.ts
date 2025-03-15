@@ -51,13 +51,15 @@ interface UserProfileResponse {
     data: UserProfileData | null
 }
 
-export async function getUserProfile(userId: string | number): Promise<UserProfileResponse> {
+export async function getUserProfile(): Promise<UserProfileResponse> {
     try {
         let telegramInitData = ""
+        let userId = null
 
         if (typeof window !== "undefined") {
             const WebApp = (await import("@twa-dev/sdk")).default
             telegramInitData = WebApp.initData
+            userId = WebApp.initDataUnsafe.user?.id
         }
 
         const response = await axios.get<UserProfileData>(

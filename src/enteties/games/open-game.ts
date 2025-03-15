@@ -16,12 +16,10 @@ interface OpenGameResponse {
 export const openGame = async (game_id: { game_id: number }): Promise<OpenGameResponse> => {
     try {
         const telegramInitData = WebApp.initData
-        // Hardcoded user_id for testing, replace with actual user ID in production
-        const userId = 123
+        const userId = WebApp.initDataUnsafe.user?.id
 
         const response = await axios.post<OpenGameData>(
             `https://ce99-109-120-134-48.ngrok-free.app/api/open_game?user_id=${userId}&game_id=${game_id.game_id}`,
-            null,
             {
                 headers: {
                     accept: "application/json",
@@ -29,7 +27,7 @@ export const openGame = async (game_id: { game_id: number }): Promise<OpenGameRe
                     "Bypass-Tunnel-Reminder": "true",
                     "x-telegram-data": telegramInitData,
                     "Content-Type": "application/json",
-                },
+                }
             },
         )
 

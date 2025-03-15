@@ -8,6 +8,7 @@ export interface Game {
     category: string
     provider_name: ProviderType
     is_first: boolean
+    priority: number // Added priority field
 }
 
 export interface GamesData {
@@ -36,15 +37,16 @@ export const getGames = async (): Promise<GameResponse> => {
                 "Bypass-Tunnel-Reminder": "true",
                 "x-telegram-data": telegramInitData,
                 "Content-Type": "application/json",
-            }
+            },
         })
 
-        console.log(response.data, "response")
+        // Sort games by priority in descending order
+        const sortedGames = response.data.games.sort((a, b) => (b.priority || 0) - (a.priority || 0))
 
         return {
             success: true,
             message: "Игры успешно получены",
-            games: response.data.games,
+            games: sortedGames,
         }
     } catch (error) {
         if (axios.isAxiosError(error)) {
